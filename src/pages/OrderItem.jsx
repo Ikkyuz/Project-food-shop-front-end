@@ -3,7 +3,7 @@ import React from 'react';
 
 const OrderItem = ({ menuImage, menuName, menuDescription, quantity, menuPrice, onRemove }) => {
   return (
-    <div className="border-4 border-red-300 rounded-lg flex flex-col md:flex-row">
+    <div className="border-4 border-red-300 rounded-lg mt-4 flex flex-col md:flex-row">
       {/* แสดงรูปภาพของเมนู */}
       <div className="relative p-6 flex justify-center items-center w-full md:w-1/2">
         <img className="w-full h-full object-cover rounded-lg" src={menuImage} alt={menuName} />
@@ -18,7 +18,7 @@ const OrderItem = ({ menuImage, menuName, menuDescription, quantity, menuPrice, 
         <p className="text-lg font-bold text-red-500">รวมราคา: {menuPrice * quantity} บาท</p>
 
         {/* ปุ่มลบออร์เดอร์ */}
-        <button onClick={onRemove} className="mt-4 px-4 py-2 bg-red-500 text-white text-lg rounded hover:bg-red-700 transition">
+        <button onClick={onRemove} className="px-4 py-2 bg-red-500 text-white text-lg rounded hover:bg-red-700 transition">
           ลบออร์เดอร์
         </button>
       </div>
