@@ -1,86 +1,105 @@
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "./../components/Layout";
 import MenuCard from "./MenuCard";
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import MenuService from "../services/menu.service";
 
 const Menu = () => {
-  // การใช้ useRef เพื่อเก็บการอ้างอิงไปยังแต่ละหมวดหมู่เมนู
+  // ใช้ useRef เพื่ออ้างอิงถึงแต่ละหมวดหมู่สำหรับการเลื่อนหน้าไปยังหมวดหมู่ที่ต้องการ
   const categoryRefs = useRef({});
-  const location = useLocation(); // ใช้ location เพื่อดักจับการเปลี่ยน URL
-  const [menus, setMenus] = useState([]); // สถานะเก็บข้อมูลเมนูที่ดึงจาก API
+  
+  // ใช้ useLocation เพื่อดึงข้อมูลเกี่ยวกับสถานะของ URL (เช่น การเลื่อนหน้าไปยังหมวดหมู่ที่ระบุ)
+  const location = useLocation();
+  
+  // สถานะที่เก็บข้อมูลเมนูที่ได้จาก API
+  const [menus, setMenus] = useState([]);
 
-  // ฟังก์ชันสำหรับเลื่อนหน้าจอไปยังหมวดหมู่ที่เลือก
+  // ฟังก์ชันสำหรับเลื่อนหน้าจอไปยังหมวดหมู่ที่ต้องการ
   const scrollToCategory = (category) => {
     if (categoryRefs.current[category]) {
+      // ใช้ scrollIntoView เพื่อเลื่อนหน้าไปยังหมวดหมู่
       categoryRefs.current[category].scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // useEffect สำหรับการตรวจจับการเปลี่ยน URL และเลื่อนหน้าจอไปยังหมวดหมู่ที่กำหนดใน URL
+  // useEffect สำหรับการเลื่อนหน้าจอไปยังหมวดหมู่เมื่อมีการเปลี่ยนแปลงใน URL
   useEffect(() => {
+    // ตรวจสอบว่าใน URL มีการระบุให้เลื่อนไปที่หมวดหมู่หรือไม่
     if (location.state?.scrollTo && location.key !== "default") {
       setTimeout(() => scrollToCategory(location.state.scrollTo), 100);
     }
   }, [location]);
 
-  // ฟังก์ชันดึงข้อมูลเมนูจาก API
+  // ฟังก์ชันสำหรับดึงข้อมูลเมนูจาก API
   const fetchMenus = () => {
+    // เรียกใช้งาน API ผ่าน MenuService
     MenuService.get()
       .then((response) => {
         console.log("API Response:", response.data);
 
         // จัดกลุ่มเมนูตามหมวดหมู่
         const groupedMenus = response.data.reduce((acc, item) => {
-          const categoryName = item.category?.name || "ไม่ระบุหมวดหมู่"; // กำหนดชื่อหมวดหมู่
+          // กำหนดชื่อหมวดหมู่ ถ้าไม่มีให้ใช้ "ไม่ระบุหมวดหมู่"
+          const categoryName = item.category?.name || "ไม่ระบุหมวดหมู่";
+          
+          // ตรวจสอบว่าหมวดหมู่นี้มีอยู่แล้วหรือไม่
           if (!acc[categoryName]) {
-            acc[categoryName] = { name: categoryName, items: [] }; // สร้างหมวดหมู่ใหม่ถ้ายังไม่มี
+            acc[categoryName] = { name: categoryName, items: [] };
           }
-          acc[categoryName].items.push(item); // เพิ่มเมนูเข้าไปในหมวดหมู่
+          
+          // เพิ่มเมนูเข้าไปในหมวดหมู่
+          acc[categoryName].items.push(item);
+          
           return acc;
         }, {});
 
-        // แปลงจาก Object เป็น Array และอัพเดท state
+        // เก็บข้อมูลเมนูที่จัดกลุ่มแล้วลงใน state
         setMenus(Object.values(groupedMenus));
       })
       .catch((error) => {
-        console.log("API Error:", error); // ถ้าเกิดข้อผิดพลาดจะจับไว้ที่นี่
-        setMenus([]); // ถ้าเกิดข้อผิดพลาดให้ตั้งค่า menus เป็น array ว่าง
+        // หากมีข้อผิดพลาดในการดึงข้อมูลจาก API
+        console.log("API Error:", error);
+        setMenus([]); // หากเกิดข้อผิดพลาดให้ล้างข้อมูลเมนู
       });
   };
 
-  // เรียกใช้ fetchMenus เมื่อคอมโพเนนต์ถูก mount
+  // ดึงข้อมูลเมนูจาก API เมื่อคอมโพเนนต์ถูก render ครั้งแรก
   useEffect(() => {
     fetchMenus();
-  }, []); // เรียกใช้เพียงครั้งเดียวเมื่อคอมโพเนนต์ถูก mount
+  }, []);
 
-  // คอมโพเนนต์หลักของหน้าจะแสดงเมนูต่างๆ ตามหมวดหมู่
   return (
     <Layout>
+      {/* ส่วนของการแสดงเมนู */}
       <section className="items-center justify-center mx-auto py-12">
         <div className="grid grid-cols-1 gap-5">
-          {/* แสดงเมนูแต่ละหมวดหมู่ */}
+          {/* แสดงหมวดหมู่เมนู */}
           {menus.map((menuCategory) => (
             <div
               key={menuCategory.name}
+              // อ้างอิงถึงหมวดหมู่นี้ใน categoryRefs เพื่อใช้ในการเลื่อนหน้าไปยังหมวดหมู่
               ref={(el) => {
                 if (menuCategory.name) {
-                  categoryRefs.current[menuCategory.name] = el; // เก็บการอ้างอิงหมวดหมู่ที่มีชื่อ
+                  categoryRefs.current[menuCategory.name] = el;
                 }
               }}
               className="border-4 border-red-300 bg-white rounded-lg p-5 shadow-md"
             >
               {/* ชื่อหมวดหมู่ */}
               <h1 className="text-2xl font-bold mb-4">{menuCategory.name}</h1>
+              
+              {/* การแสดงเมนูในหมวดหมู่ */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {/* แสดงการ์ดเมนูแต่ละรายการในหมวดหมู่นั้น */}
+                {/* แสดงการ์ดเมนู */}
                 {menuCategory.items?.map((item) => (
-                  <MenuCard 
-                  key={item.id}
-                  id={item.id}  // ✅ ส่ง ID ไปยัง MenuItemCard
-                  imageUrl={item.imageUrl}
-                  name={item.name}
-                />
+                  <MenuCard
+                    key={item.id}
+                    id={item.id}
+                    pictureUrl={item.pictureUrl}
+                    name={item.name}
+                    price={item.price}
+                    description={item.description}
+                  />
                 ))}
               </div>
             </div>
