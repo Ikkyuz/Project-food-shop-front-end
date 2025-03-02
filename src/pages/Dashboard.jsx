@@ -55,8 +55,8 @@ const Dashboard = () => {
                   className={`border-b ${index % 2 === 0 ? "bg-gray-100" : "bg-white"} hover:bg-gray-200 transition`}
                 >
                   <td className="px-6 py-3">{order.name}</td>
-                  <td className="px-6 py-3 text-center">{order.quantity}</td>
-                  <td className="px-6 py-3 text-right">{order.price * order.quantity} บาท</td>
+                  <td className="px-6 py-3">{order.quantity}</td>
+                  <td className="px-6 py-3">{order.price * order.quantity} บาท</td>
                 </tr>
               ))}
             </tbody>
