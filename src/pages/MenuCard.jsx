@@ -41,10 +41,10 @@ const MenuCard = ({ id, pictureUrl, name, price, description }) => {
       <h2 className="text-xl font-bold mt-4">{name}</h2>
 
       {/* ✅ รายละเอียดของเมนู */}
-      <p className="text-gray-700 text-lg leading-relaxed my-4 px-4">{description}</p>
+      <p className="text-gray-700 text-lg leading-relaxed my-auto px-4">{description}</p>
 
       {/* ✅ ราคาเมนู */}
-      <p className="text-lg font-bold mt-4">ราคา: {price} บาท</p>
+      <p className="text-lg font-bold ">ราคา: {price} บาท</p>
 
       {/* ✅ ส่วนเพิ่ม-ลดจำนวน */}
       <div className="flex items-center my-4">
