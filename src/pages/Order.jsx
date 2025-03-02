@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import OrderItem from '../pages/OrderItem';  // นำเข้า OrderItem แบบ default
 
 const Order = () => {
   // State สำหรับเก็บรายการออร์เดอร์ที่ดึงมาจาก localStorage
   const [orders, setOrders] = useState([]);
+  const navigate = useNavigate();
 
   // useEffect สำหรับโหลดข้อมูลออร์เดอร์จาก localStorage เมื่อคอมโพเนนต์ถูก mount
   useEffect(() => {
@@ -39,36 +40,45 @@ const Order = () => {
     localStorage.removeItem('orders');  // ลบข้อมูลจาก localStorage
   };
 
+  const submitForm = () => {
+    localStorage.setItem("confirmedOrders", JSON.stringify(orders)); // บันทึกข้อมูลออร์เดอร์
+    setOrders([]);  // ล้างข้อมูลใน state
+    localStorage.removeItem("orders"); // ลบข้อมูล orders ที่ยังไม่ได้ยืนยัน
+    navigate("/");
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-12 p-4">
-        {/* แสดงรายการออร์เดอร์ทั้งหมด */}
-        {orders.map((order) => (
-          <OrderItem
-            key={order.id}  // ใช้ id ของออร์เดอร์เป็น key เพื่อให้ React จัดการการเปลี่ยนแปลงได้อย่างถูกต้อง
-            pictureUrl={order.pictureUrl}
-            name={order.name}
-            description={order.description}
-            quantity={order.quantity}
-            price={order.price}
-            onRemove={() => removeOrder(order.id)}  // ส่งฟังก์ชัน removeOrder เพื่อใช้ในแต่ละรายการ
-          />
-        ))}
+        <form onSubmit={submitForm}>
+          {/* แสดงรายการออร์เดอร์ทั้งหมด */}
+          {orders.map((order) => (
+            <OrderItem
+              key={order.id}  // ใช้ id ของออร์เดอร์เป็น key เพื่อให้ React จัดการการเปลี่ยนแปลงได้อย่างถูกต้อง
+              pictureUrl={order.pictureUrl}
+              name={order.name}
+              description={order.description}
+              quantity={order.quantity}
+              price={order.price}
+              onRemove={() => removeOrder(order.id)}  // ส่งฟังก์ชัน removeOrder เพื่อใช้ในแต่ละรายการ
+            />
+          ))}
 
-        {/* ส่วนแสดงปุ่มสำหรับยืนยันออร์เดอร์และลบออร์เดอร์ทั้งหมด */}
-        <div className="flex items-center justify-end mt-4 space-x-6">
-          {/* ปุ่มลบออร์เดอร์ทั้งหมด จะแสดงก็ต่อเมื่อมีออร์เดอร์ */}
-          {orders.length > 0 && (
-            <button onClick={clearOrders} className="mt-4 px-4 py-2 bg-gray-500 text-white text-lg rounded hover:bg-gray-700 transition">
-              ลบออร์เดอร์ทั้งหมด
+          {/* ส่วนแสดงปุ่มสำหรับยืนยันออร์เดอร์และลบออร์เดอร์ทั้งหมด */}
+          <div className="flex items-center justify-end mt-4 space-x-6">
+            {/* ปุ่มลบออร์เดอร์ทั้งหมด จะแสดงก็ต่อเมื่อมีออร์เดอร์ */}
+            {orders.length > 0 && (
+              <button onClick={clearOrders} className="mt-4 px-4 py-2 bg-gray-500 text-white text-lg rounded hover:bg-gray-700 transition">
+                ลบออร์เดอร์ทั้งหมด
+              </button>
+            )}
+
+            {/* ปุ่มยืนยันออร์เดอร์ */}
+            <button type='submit' className="mt-4 px-4 py-2 bg-blue-500 text-white text-lg rounded hover:bg-blue-700 transition">
+              ยืนยันออร์เดอร์
             </button>
-          )}
-
-          {/* ปุ่มยืนยันออร์เดอร์ */}
-          <button className="mt-4 px-4 py-2 bg-blue-500 text-white text-lg rounded hover:bg-blue-700 transition">
-            ยืนยันออร์เดอร์
-          </button>
-        </div>
+          </div>
+        </form>
       </div>
     </Layout>
   );
